@@ -10,15 +10,15 @@
  */
 
 /**
- * The 'expertise' taxonomy.
+ * The 'staff' custom post type.
  *
- * Registers taxonomy name, labels, & parameters.
+ * Registers post type name, labels, & parameters.
  *
  * @package    Jones_Multi
  * @subpackage Jones_Multi/admin
  * @author     Nick Mortensen <nmortensen@jonessign.com>
  */
-class Expertise {
+class Staff {
 	/**
 	 * The arguments of this taxonomy.
 	 *
@@ -52,23 +52,7 @@ class Expertise {
 	 */
 	private $singular_name = 'expertise';
 
-	/**
-	 * Event constructor.
-	 *
-	 * When class is instantiated
-	 */
-	public function __construct() {
-		// Register the taxonomy.
-		add_action( 'init', [ $this, 'register' ] );
-		// Setup the extra fields.
-		add_action( 'cmb2_init', [ $this, 'register_taxonomy_metabox' ] );
-		// Add extra columns to the administrator end of this taxonomy.
-		add_filter( 'manage_edit-' . $this->type . '_columns', [ $this, 'set_columns' ], 10, 1 );
-		// Place data within the newly added columns for the admin side of this taxonomy.
-		add_filter( 'manage_' . $this->type . '_custom_column', [ $this, 'edit_columns' ], 10, 3 );
-		// Make new columns for this taxonomy sortable.
-		add_action( 'manage_edit-' . $this->type . '_sortable_columns', [ $this, 'sortable_columns' ] );
-	}
+
 	/**
 	 * Create the taxonomy for 'expertise'.
 	 *
@@ -86,7 +70,7 @@ class Expertise {
 			'edit_item'                  => __( 'Edit Expertise', 'JonesMulti' ),
 			'items_list'                 => __( 'Expertise List', 'JonesMulti' ),
 			'items_list_navigation'      => __( 'Expertise List Nav', 'JonesMulti' ),
-			'menu_name'                  => __( 'Expertises', 'JonesMulti' ),
+			'menu_name'                  => __( 'Expertise Tags', 'JonesMulti' ),
 			'name'                       => _x( 'Expertise', 'Taxonomy General Name', 'JonesMulti' ),
 			'new_item_name'              => __( 'New Expertise Tag', 'JonesMulti' ),
 			'no_terms'                   => __( 'No Expertise Tags', 'JonesMulti' ),
@@ -130,7 +114,7 @@ class Expertise {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function register_taxonomy_metabox() {
+	public static function register_expertise_taxonomy_metabox() {
 		$prefix = 'expertise_';
 			// Create an instance of the cmbs2box called $expertise.
 		$newfields = new_cmb2_box(
@@ -178,51 +162,16 @@ class Expertise {
 	}
 
 	/**
-	 * Set up some new columns in the admin screen for this taxonomy.
+	 * Event constructor.
 	 *
-	 * @param array $columns The existing columns before I monkeyed with them.
-	 * @link https://shibashake.com/wordpress-theme/modify-custom-taxonomy-columns
+	 * When class is instantiated
 	 */
-	public function set_columns( $columns ) {
-		// Remove the checkbox that comes with $columns.
-		unset( $columns['cb'] );
-		// Add the checkbox back in so it can be before the ID column.
-		$new['cb'] = '<input type="checkbox" />';
-		$new['id'] = 'ID';
-		return array_merge( $new, $columns );
+	public function __construct() {
+		// Register the taxonomy.
+		add_action( 'init', [ $this, 'register' ] );
+		// Setup the extra fields.
+		add_action( 'cmb2_init', [ $this, 'register_expertise_taxonomy_metabox' ] );
 	}
-
-	/**
-	 * Put content into the newly setup columns columns in the admin screen for the taxonomy.
-	 *
-	 * @param array  $column The existing columns before I monkeyed with them.
-	 * @param string $tax     Taxonomy name - in this case 'location'.
-	 * @param int    $term_id ID number assigned to the term in the jco_terms table within the db.
-	 */
-	public function edit_columns( $column, $tax, $term_id ) {
-		$tax = $this->type;
-		switch ( $column ) {
-			case 'id':
-				$output = $term_id;
-				break;
-		default:
-			// $output = '<i class = "text-indigo-600 material-icons">stars</i>';
-			$output = $term_id;
-		}
-		echo $output;
-	}
-
-	/**
-	 * Make custom columns added to the taxonomy sortable.
-	 *
-	 * @link https://code.tutsplus.com/articles/quick-tip-make-your-custom-column-sortable--wp-25095
-	 * @param array $columns An array of the existing columns.
-	 */
-	public function sortable_columns( $columns ) {
-		$columns['id'] = 'ID';
-		return $columns;
-	}
-
 
 }
 

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The file that defines the core plugin class
  *
@@ -75,7 +74,7 @@ class Jones_Multi {
 		$this->plugin_name = 'jones-multi';
 
 		$this->load_dependencies();
-		$this->setup_taxonomies();
+		$this->create_additional_taxonomies();
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
@@ -99,6 +98,7 @@ class Jones_Multi {
 	 * @access   private
 	 */
 	private function load_dependencies() {
+
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
@@ -217,23 +217,40 @@ class Jones_Multi {
 	}
 
 	/**
-	 * Loads Taxonomies.
+	 * Load New Taxonomies.
 	 *
-	 * Uses the loads the taxonomies unique to the project.
+	 * Loads the taxonomies unique to the project.
 	 *
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function setup_taxonomies() {
+	private function create_additional_taxonomies() {
 
 		/**
 		 * The class responsible for defining the signtype taxonomy.
 		 * of the plugin.
+		 *
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-taxonomy-services.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-taxonomy-location.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-taxonomy-expertise.php';
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-taxonomy-signtype.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-project.php';
 
+	}
+
+	/**
+	 * Load Additional Post Types.
+	 *
+	 * Loads the additional post types unique to the multisite.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function create_additional_posttypes() {
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-staff.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-project.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-client.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-testimonial.php';
 	}
 }

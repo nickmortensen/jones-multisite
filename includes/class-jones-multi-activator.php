@@ -30,9 +30,9 @@ class Jones_Multi_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
+		// Load CMB2 for custom fields on taxonomies and post types.
 		require_once __DIR__ . '/cmb2/init.php';
-		// Custom Taxonomy definitions.
-		// require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/custom-taxonomies/sign-type-taxonomy.php';
+
 	}
 
 }

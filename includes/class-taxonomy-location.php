@@ -53,19 +53,36 @@ class Location {
 	 */
 	private $singular_name = 'Location';
 
+	/**
+	 * Event constructor.
+	 *
+	 * When class is instantiated
+	 */
+	public function __construct() {
+		// Register the taxonomy.
+		add_action( 'init', [ $this, 'register' ] );
+		// Setup the extra fields.
+		add_action( 'cmb2_init', [ $this, 'register_location_taxonomy_metabox' ] );
+		// Admin set post columns - put additional columns into the admin end for the location taxonomy.
+		add_filter( 'manage_edit-' . $this->type . '_columns', [ $this, 'set_columns' ], 10, 1 );
+		// Place data within the newly added columns for the admin side of the location taxonomy.
+		add_filter( 'manage_' . $this->type . '_custom_column', [ $this, 'edit_columns' ], 10, 3 );
+		// Make new columns for this taxonomy sortable.
+		add_action( 'manage_edit-' . $this->type . '_sortable_columns', [ $this, 'sortable_columns' ] );
+	}
 
 	/**
-	 * Create the taxonomy for 'expertise'.
+	 * Create the taxonomy for 'location'.
 	 *
-	 * Create a custom taxonomy for all sites of 'expertise'.
+	 * Create a custom taxonomy for all sites of 'location'.
 	 *
 	 * @since    1.0.0
 	 */
 	public static function register() {
-		$labels = [
+		$labels  = [
 			'name'                       => _x( 'Locations', 'Taxonomy General Name', 'js2020' ),
 			'singular_name'              => _x( 'Location', 'Taxonomy Singular Name', 'js2020' ),
-			'menu_name'                  => __( 'Jones Locations', 'js2020' ),
+			'menu_name'                  => __( 'Locations', 'js2020' ),
 			'all_items'                  => __( 'All Locations', 'js2020' ),
 			'parent_item'                => __( 'Main', 'js2020' ),
 			'parent_item_colon'          => __( 'Main Location', 'js2020' ),
@@ -83,14 +100,14 @@ class Location {
 			'no_terms'                   => __( 'No Locations', 'js2020' ),
 			'items_list'                 => __( 'Locations list', 'js2020' ),
 			'items_list_navigation'      => __( 'Locations list navigation', 'js2020' ),
+			'back_to_terms'              => __( 'Back to Location Tags', 'js2020' ),
 		];
 		$rewrite = [
-			'slug'                       => 'location',
-			'with_front'                 => true,
-			'hierarchical'               => false,
+			'slug'         => 'location',
+			'with_front'   => true,
+			'hierarchical' => false,
 		];
-
-		$args = [
+		$args    = [
 			'labels'             => $labels,
 			'description'        => 'Covers Various Jones Sign Company Locations around North America',
 			'hierarchical'       => false,
@@ -114,7 +131,7 @@ class Location {
 			'nav_menu_item',
 		];
 
-		register_taxonomy( $this->type, $objects_array, $args );
+		register_taxonomy( 'location', $objects_array, $args );
 	}
 
 	/**
@@ -125,127 +142,11 @@ class Location {
 	 * @since    1.0.0
 	 */
 	public function register_location_taxonomy_metabox() {
-		// Establish prefeix.
-		$prefix = '$location_';
-		// Create an instance of the cmbs2box called $location.
-		$location = new_cmb2_box(
-			[
-				'id'                           => $prefix . 'edit',
-				'title'                        => esc_html__( 'Location Taxonomy Extra Info', 'jsCustom' ),
-				'object_types'                 => array( 'term' ), // indicate to cmb we are using terms and not posts.
-				'taxonomies'                   => array( 'location' ), // Fields can be added to more than one taxonomy term, but we will limit these just to the signtype taxonomy term.
-				'cmb_styles'                   => true, // Disable cmb2 stylesheet.
-				'show_in_rest'                 => WP_REST_Server::ALLMETHODS, // WP_REST_Server::READABLE|WP_REST_Server::EDITABLE, // Determines which HTTP methods the box is visible in.
-				// Optional callback to limit box visibility.
-				// See: https://github.com/CMB2/CMB2/wiki/REST-API#permissions.
-				'get_box_permissions_check_cb' => 'projects_limit_rest_view_to_logged_in_users',
-			]
-		);
-		$location->add_field(
-			[
-				'name'        => __( 'Website URL', 'cmb2' ),
-				'description' => 'nimble website url',
-				'id'          => 'locationURL',
-				'type'        => 'text_url',
-				'show_names'  => true,
-				'classes_cb'  => 'add_these_classes',
-				'protocols'   => [ 'http', 'https' ],
-				'attributes'  => (
-					[
-						'placeholder'  => 'http://jonessign.com',
-						'data-fucking' => 'ConditionalFucking',
-					]
-				),
-			]
-		);
-
-		/* CAPABILITIES OF THE LOCATION */
-		$location->add_field(
-			[
-				'name'              => 'Capability',
-				'desc'              => 'check all that apply',
-				'id'                => 'locationCapabilities',
-				'type'              => 'multicheck',
-				'inline'            => true,
-				'select_all_button' => false,
-				'options'           => [
-					'Fabrication'        => 'Fab',
-					'Installation'       => 'Install',
-					'Project Management' => 'PM',
-					'Sales'              => 'Sales',
-				],
-			]
-		);
-
-		$location->add_field(
-			[
-				'before'       => 'dashicons_callback',
-				'name'         => 'Location Image',
-				'show_names'   => false,
-				'desc'         => '',
-				'id'           => 'locationImage',
-				'type'         => 'file',
-				'options'      => [ 'url' => false ], // No box that allows for the url to be typed in as I want to use the image ids.
-				'text'         => [ 'add_upload_file_text' => 'Upload or Find Location Image' ],
-				// query_args are passed to wp.media's library query.
-				'query_args'   => [
-					'type' => [ 'image/jpg', 'image/jpeg' ],
-				],
-				'preview_size' => 'medium', // Image size to use when previewing in the admin.
-			]
-		);
-		/* Location Phone */
-		$location->add_field(
-			[
-				'name'    => 'Phone',
-				'desc'    => '',
-				'default' => '',
-				'id'      => 'locationPhone',
-				'type'    => 'text_medium',
-			]
-		);
-		/* Location Fax */
-		$location->add_field(
-			[
-				'name'    => 'Fax',
-				'desc'    => '',
-				'default' => '',
-				'id'      => 'locationFax',
-				'type'    => 'text_medium',
-			]
-		);
-		/* Location Street Address */
-		$location->add_field(
-			[
-				'name'    => 'Address',
-				'desc'    => '',
-				'default' => '',
-				'id'      => 'locationAddress',
-				'type'    => 'text_medium',
-			]
-		);
-
-		/* Location City */
-		$location->add_field(
-			[
-				'name'    => 'City',
-				'desc'    => '',
-				'default' => '',
-				'id'      => 'locationCity',
-				'type'    => 'text_medium',
-			]
-
-		);
-			/* Location State */
-	$location->add_field(
-		array(
-			'type'             => 'select',
-			'default'          => 'custom',
-			'name'             => 'State',
-			'desc'             => '',
-			'id'               => 'locationState',
-			'show_option_none' => 'Select State',
-			'options'          => array(
+		/**
+		 * get all the states as an associative array.
+		 */
+		function get_state_options() {
+			$states = [
 				'AL' => 'Alabama',
 				'AK' => 'Alaska',
 				'AZ' => 'Arizona',
@@ -297,41 +198,206 @@ class Location {
 				'WV' => 'West Virginia',
 				'WI' => 'Wisconsin',
 				'WY' => 'Wyoming',
-			),
-		)
-	);
-	/* ENDLocation State */
+			];
+			return $states;
+		}
+		// Establish prefeix.
+		$prefix = '$location_';
+		// Create an instance of the cmbs2box called $location.
+		$location = new_cmb2_box(
+			[
+				'id'                           => $prefix . 'edit',
+				'title'                        => esc_html__( 'Location Taxonomy Extra Info', 'jsCustom' ),
+				'object_types'                 => array( 'term' ), // indicate to cmb we are using terms and not posts.
+				'taxonomies'                   => array( 'location' ), // Fields can be added to more than one taxonomy term, but we will limit these just to the signtype taxonomy term.
+				'cmb_styles'                   => true, // Disable cmb2 stylesheet.
+				'show_in_rest'                 => WP_REST_Server::ALLMETHODS, // WP_REST_Server::READABLE|WP_REST_Server::EDITABLE, // Determines which HTTP methods the box is visible in.
+				// Optional callback to limit box visibility.
+				// See: https://github.com/CMB2/CMB2/wiki/REST-API#permissions.
+				'get_box_permissions_check_cb' => 'projects_limit_rest_view_to_logged_in_users',
+			]
+		);
 
-	/* Location Zip */
-	$location->add_field(
-		array(
-			'name'    => 'Zip',
-			'desc'    => '',
-			'default' => '',
-			'id'      => 'locationZip',
-			'type'    => 'text_medium',
-		)
-	);
-	/* Location Latitude */
-	$location->add_field(
-		array(
-			'name'    => 'latitude',
-			'desc'    => '',
-			'default' => '',
-			'id'      => 'locationLatitude',
-			'type'    => 'text_medium',
-		)
-	);
-	/* Location Longitude */
-	$location->add_field(
-		array(
-			'name'    => 'longitude',
-			'desc'    => '',
-			'default' => '',
-			'id'      => 'locationLongitude',
-			'type'    => 'text_medium',
-		)
-	);
+		/* SUBDOMAIN URL */
+		$location->add_field(
+			[
+				'name'        => __( 'Subdomain Website URL', 'cmb2' ),
+				'description' => 'subdomain website url',
+				'id'          => 'subdomainURL',
+				'type'        => 'text_url',
+				'show_names'  => true,
+				'classes_cb'  => 'add_these_classes',
+				'protocols'   => [ 'http', 'https' ],
+			]
+		);
+
+		/* NIMBLE URL */
+		$location->add_field(
+			[
+				'name'        => __( 'Website URL', 'cmb2' ),
+				'description' => 'nimble website url',
+				'id'          => 'locationURL',
+				'type'        => 'text_url',
+				'show_names'  => true,
+				'classes_cb'  => 'add_these_classes',
+				'protocols'   => [ 'http', 'https' ],
+			]
+		);
+
+		/* CAPABILITIES OF THE LOCATION */
+		$location->add_field(
+			[
+				'name'              => 'Capability',
+				'desc'              => 'check all that apply',
+				'id'                => 'locationCapabilities',
+				'type'              => 'multicheck',
+				'inline'            => true,
+				'select_all_button' => false,
+				'options'           => [
+					'Fabrication'        => 'Fab',
+					'Installation'       => 'Install',
+					'Project Management' => 'PM',
+					'Sales'              => 'Sales',
+				],
+			]
+		);
+
+		$location->add_field(
+			[
+				'name'         => 'Location Image',
+				'show_names'   => true,
+				'desc'         => '',
+				'id'           => 'locationImage',
+				'type'         => 'file',
+				'options'      => [ 'url' => false ], // No box that allows for the url to be typed in as I want to use the image ids.
+				'text'         => [ 'add_upload_file_text' => 'Upload or Find Location Image' ],
+				// query_args are passed to wp.media's library query.
+				'query_args'   => [
+					'type' => [ 'image/jpg', 'image/jpeg' ],
+				],
+				'preview_size' => 'medium', // Image size to use when previewing in the admin.
+			]
+		);
+
+		$location->add_field(
+			[
+				'name'         => 'City Image',
+				'show_names'   => true,
+				'desc'         => '',
+				'id'           => 'cityImage',
+				'type'         => 'file',
+				'options'      => [ 'url' => false ], // No box that allows for the url to be typed in as I want to use the image ids.
+				'text'         => [ 'add_upload_file_text' => 'Upload or Find City Image' ],
+				// query_args are passed to wp.media's library query.
+				'query_args'   => [
+					'type' => [ 'image/jpg', 'image/jpeg' ],
+				],
+				'preview_size' => 'medium', // Image size to use when previewing in the admin.
+			]
+		);
+
+		/* Location Phone */
+		$location->add_field(
+			[
+				'name'    => 'Phone',
+				'desc'    => '',
+				'default' => '',
+				'id'      => 'locationPhone',
+				'type'    => 'text_medium',
+			]
+		);
+
+
+		/* Location Phone */
+		$location->add_field(
+			[
+				'name'    => 'email',
+				'desc'    => '',
+				'default' => '',
+				'id'      => 'locationEmail',
+				'type'    => 'text_email',
+			]
+		);
+
+		/* Location Fax */
+		$location->add_field(
+			[
+				'name'    => 'Fax',
+				'desc'    => '',
+				'default' => '',
+				'id'      => 'locationFax',
+				'type'    => 'text_medium',
+			]
+		);
+
+		/* Location Street Address */
+		$location->add_field(
+			[
+				'name'    => 'Address',
+				'desc'    => '',
+				'default' => '',
+				'id'      => 'locationAddress',
+				'type'    => 'text_medium',
+			]
+		);
+
+		/* Location City */
+		$location->add_field(
+			[
+				'name'    => 'City',
+				'desc'    => '',
+				'default' => '',
+				'id'      => 'locationCity',
+				'type'    => 'text_medium',
+			]
+
+		);
+
+		/* Location State */
+		$location->add_field(
+			array(
+				'type'             => 'select',
+				'default'          => 'custom',
+				'name'             => 'State',
+				'desc'             => '',
+				'id'               => 'locationState',
+				'show_option_none' => 'Select State',
+				'options_cb'       => 'get_state_options',
+			)
+		);
+
+		/* Location Zip */
+		$location->add_field(
+			array(
+				'name'    => 'Zip',
+				'desc'    => '',
+				'default' => '',
+				'id'      => 'locationZip',
+				'type'    => 'text_medium',
+			)
+		);
+
+		/* Location Latitude */
+		$location->add_field(
+			array(
+				'name'    => 'latitude',
+				'desc'    => '',
+				'default' => '',
+				'id'      => 'locationLatitude',
+				'type'    => 'text_medium',
+			)
+		);
+
+		/* Location Longitude */
+		$location->add_field(
+			array(
+				'name'    => 'longitude',
+				'desc'    => '',
+				'default' => '',
+				'id'      => 'locationLongitude',
+				'type'    => 'text_medium',
+			)
+		);
 		/* Location GoogleCID */
 		$location->add_field(
 			array(
@@ -355,87 +421,54 @@ class Location {
 
 	} // End def function register_projects_metabox().
 
-
 	/**
-	 * Event constructor.
+	 * Set up some new columns in the admin screen for the location taxonomy.
 	 *
-	 * When class is instantiated
+	 * @param array $columns The existing columns before I monkeyed with them.
+	 * @link https://shibashake.com/wordpress-theme/modify-custom-taxonomy-columns
 	 */
-	public function __construct() {
-		// Register the taxonomy.
-		add_action( 'init', [ $this, 'register' ] );
-		// Setup the extra fields.
-		add_action( 'cmb2_init', [ $this, 'register_location_taxonomy_metabox' ] );
-		// Admin set post columns
-		// add_filter( 'manage_edit-'.$this->type.'_columns',        array($this, 'set_columns'), 10, 1) ;
-
-		// Admin edit post columns
-		// add_action( 'manage_'.$this->type.'_posts_custom_column', array($this, 'edit_columns'), 10, 2 );
-
+	public function set_columns( $columns ) {
+		// Remove the checkbox that comes with $columns.
+		unset( $columns['cb'] );
+		// Add the checkbox back in so it can be before the ID column.
+		$new['cb'] = '<input type="checkbox" />';
+		$new['id'] = 'ID';
+		return array_merge( $new, $columns );
 	}
 
 	/**
-	 * Callback for the locationState field.
+	 * Put content into the newly setup columns columns in the admin screen for the location taxonomy.
 	 *
-	 * @param bool $value Whether the specific state should be the default.
-	 *
-	 * @return string $state_option HTML for all the options in the select dropdown.
+	 * @param array  $column The existing columns before I monkeyed with them.
+	 * @param string $tax     Taxonomy name - in this case 'location'.
+	 * @param int    $term_id ID number assigned to the term in the jco_terms table within the db.
 	 */
-	public $states_array = array(
-		'AL' => 'Alabama',
-		'AK' => 'Alaska',
-		'AZ' => 'Arizona',
-		'AR' => 'Arkansas',
-		'CA' => 'California',
-		'CO' => 'Colorado',
-		'CT' => 'Connecticut',
-		'DE' => 'Delaware',
-		'DC' => 'District Of Columbia',
-		'FL' => 'Florida',
-		'GA' => 'Georgia',
-		'HI' => 'Hawaii',
-		'ID' => 'Idaho',
-		'IL' => 'Illinois',
-		'IN' => 'Indiana',
-		'IA' => 'Iowa',
-		'KS' => 'Kansas',
-		'KY' => 'Kentucky',
-		'LA' => 'Louisiana',
-		'ME' => 'Maine',
-		'MD' => 'Maryland',
-		'MA' => 'Massachusetts',
-		'MI' => 'Michigan',
-		'MN' => 'Minnesota',
-		'MS' => 'Mississippi',
-		'MO' => 'Missouri',
-		'MT' => 'Montana',
-		'NE' => 'Nebraska',
-		'NV' => 'Nevada',
-		'NH' => 'New Hampshire',
-		'NJ' => 'New Jersey',
-		'NM' => 'New Mexico',
-		'NY' => 'New York',
-		'NC' => 'North Carolina',
-		'ND' => 'North Dakota',
-		'OH' => 'Ohio',
-		'OK' => 'Oklahoma',
-		'OR' => 'Oregon',
-		'PA' => 'Pennsylvania',
-		'RI' => 'Rhode Island',
-		'SC' => 'South Carolina',
-		'SD' => 'South Dakota',
-		'TN' => 'Tennessee',
-		'TX' => 'Texas',
-		'UT' => 'Utah',
-		'VT' => 'Vermont',
-		'VA' => 'Virginia',
-		'WA' => 'Washington',
-		'WV' => 'West Virginia',
-		'WI' => 'Wisconsin',
-		'WY' => 'Wyoming',
-	);
+	public function edit_columns( $column, $tax, $term_id ) {
+		$tax = $this->type;
+		switch ( $column ) {
+			case 'id':
+				$output = $term_id;
+				break;
+		default:
+			// $output = '<i class = "text-indigo-600 material-icons">stars</i>';
+			$output = $term_id;
+		}
+		echo $output;
+	}
 
-}
+	/**
+	 * Make custom columns added to the taxonomy sortable.
+	 *
+	 * @link https://code.tutsplus.com/articles/quick-tip-make-your-custom-column-sortable--wp-25095
+	 * @param array $columns An array of the existing columns.
+	 */
+	public function sortable_columns( $columns ) {
+		$columns['id'] = 'ID';
+		return $columns;
+
+	}
+
+}//end class definition
 /**
  * Instantiate class, creating taxonomy.
  */
