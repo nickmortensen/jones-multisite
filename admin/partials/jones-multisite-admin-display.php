@@ -5,11 +5,11 @@
  *
  * This file is used to markup the admin-facing aspects of the plugin.
  *
- * @link       https://github.com/nickmortensen
+ * @link       https://github.com/user/nickmortensen
  * @since      1.0.0
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/admin/partials
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/admin/partials
  */
 ?>
 

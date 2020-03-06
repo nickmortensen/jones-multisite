@@ -6,11 +6,11 @@
  * Loads and defines the internationalization files for this plugin
  * so that it is ready for translation.
  *
- * @link       https://github.com/nickmortensen
+ * @link       https://github.com/user/nickmortensen
  * @since      1.0.0
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/includes
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/includes
  */
 
 /**
@@ -20,11 +20,11 @@
  * so that it is ready for translation.
  *
  * @since      1.0.0
- * @package    Jones_Multi
- * @subpackage Jones_Multi/includes
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/includes
  * @author     Nick Mortensen <nmortensen@jonessign.com>
  */
-class Jones_Multi_i18n {
+class Jones_Multisite_i18n {
 
 
 	/**
@@ -35,7 +35,7 @@ class Jones_Multi_i18n {
 	public function load_plugin_textdomain() {
 
 		load_plugin_textdomain(
-			'jones-multi',
+			'jones-multisite',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);

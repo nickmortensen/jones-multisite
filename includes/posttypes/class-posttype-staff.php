@@ -5,8 +5,8 @@
  * @link       https://github.com/nickmortensen
  * @since      1.0.0
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/admin
+ * @package    Jones_Multisites
+ * @subpackage Jones_Multisites/admin
  */
 
 /**
@@ -14,8 +14,8 @@
  *
  * Registers post type name, labels, & parameters.
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/admin
+ * @package    Jones_Multisites
+ * @subpackage Jones_Multisites/admin
  * @author     Nick Mortensen <nmortensen@jonessign.com>
  */
 class Staff {

@@ -3,11 +3,11 @@
 /**
  * The public-facing functionality of the plugin.
  *
- * @link       https://github.com/nickmortensen
+ * @link       https://github.com/user/nickmortensen
  * @since      1.0.0
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/public
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/public
  */
 
 /**
@@ -16,11 +16,11 @@
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the public-facing stylesheet and JavaScript.
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/public
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/public
  * @author     Nick Mortensen <nmortensen@jonessign.com>
  */
-class Jones_Multi_Public {
+class Jones_Multisite_Public {
 
 	/**
 	 * The ID of this plugin.
@@ -65,15 +65,15 @@ class Jones_Multi_Public {
 		 * This function is provided for demonstration purposes only.
 		 *
 		 * An instance of this class should be passed to the run() function
-		 * defined in Jones_Multi_Loader as all of the hooks are defined
+		 * defined in Jones_Multisite_Loader as all of the hooks are defined
 		 * in that particular class.
 		 *
-		 * The Jones_Multi_Loader will then create the relationship
+		 * The Jones_Multisite_Loader will then create the relationship
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/jones-multi-public.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/jones-multisite-public.css', array(), $this->version, 'all' );
 
 	}
 
@@ -88,15 +88,15 @@ class Jones_Multi_Public {
 		 * This function is provided for demonstration purposes only.
 		 *
 		 * An instance of this class should be passed to the run() function
-		 * defined in Jones_Multi_Loader as all of the hooks are defined
+		 * defined in Jones_Multisite_Loader as all of the hooks are defined
 		 * in that particular class.
 		 *
-		 * The Jones_Multi_Loader will then create the relationship
+		 * The Jones_Multisite_Loader will then create the relationship
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/jones-multi-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/jones-multisite-public.js', array( 'jquery' ), $this->version, false );
 
 	}
 

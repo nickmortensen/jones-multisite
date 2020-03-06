@@ -19,10 +19,10 @@
  * For more information, see the following discussion:
  * https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate/pull/123#issuecomment-28541913
  *
- * @link       https://github.com/nickmortensen
+ * @link       https://github.com/user/nickmortensen
  * @since      1.0.0
  *
- * @package    Jones_Multi
+ * @package    Jones_Multisite
  */
 
 // If uninstall not called from WordPress, then exit.

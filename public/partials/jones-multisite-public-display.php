@@ -5,11 +5,11 @@
  *
  * This file is used to markup the public-facing aspects of the plugin.
  *
- * @link       https://github.com/nickmortensen
+ * @link       https://github.com/user/nickmortensen
  * @since      1.0.0
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/public/partials
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/public/partials
  */
 ?>
 

@@ -1,15 +1,16 @@
 <?php
+
 /**
  * The file that defines the core plugin class
  *
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @link       https://github.com/nickmortensen
+ * @link       https://github.com/user/nickmortensen
  * @since      1.0.0
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/includes
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/includes
  */
 
 /**
@@ -22,11 +23,11 @@
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    Jones_Multi
- * @subpackage Jones_Multi/includes
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/includes
  * @author     Nick Mortensen <nmortensen@jonessign.com>
  */
-class Jones_Multi {
+class Jones_Multisite {
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -34,7 +35,7 @@ class Jones_Multi {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      Jones_Multi_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 * @var      Jones_Multisite_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -66,15 +67,14 @@ class Jones_Multi {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		if ( defined( 'JONES_MULTI_VERSION' ) ) {
-			$this->version = JONES_MULTI_VERSION;
+		if ( defined( 'JONES_MULTISITE_VERSION' ) ) {
+			$this->version = JONES_MULTISITE_VERSION;
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name = 'jones-multi';
+		$this->plugin_name = 'jones-multisite';
 
 		$this->load_dependencies();
-		$this->create_additional_taxonomies();
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
@@ -86,10 +86,10 @@ class Jones_Multi {
 	 *
 	 * Include the following files that make up the plugin:
 	 *
-	 * - Jones_Multi_Loader. Orchestrates the hooks of the plugin.
-	 * - Jones_Multi_i18n. Defines internationalization functionality.
-	 * - Jones_Multi_Admin. Defines all hooks for the admin area.
-	 * - Jones_Multi_Public. Defines all hooks for the public side of the site.
+	 * - Jones_Multisite_Loader. Orchestrates the hooks of the plugin.
+	 * - Jones_Multisite_i18n. Defines internationalization functionality.
+	 * - Jones_Multisite_Admin. Defines all hooks for the admin area.
+	 * - Jones_Multisite_Public. Defines all hooks for the public side of the site.
 	 *
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
@@ -99,38 +99,37 @@ class Jones_Multi {
 	 */
 	private function load_dependencies() {
 
-
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-jones-multi-loader.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-jones-multisite-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-jones-multi-i18n.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-jones-multisite-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-jones-multi-admin.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-jones-multisite-admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-jones-multi-public.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-jones-multisite-public.php';
 
-		$this->loader = new Jones_Multi_Loader();
+		$this->loader = new Jones_Multisite_Loader();
 
 	}
 
 	/**
 	 * Define the locale for this plugin for internationalization.
 	 *
-	 * Uses the Jones_Multi_i18n class in order to set the domain and to register the hook
+	 * Uses the Jones_Multisite_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
 	 * @since    1.0.0
@@ -138,7 +137,7 @@ class Jones_Multi {
 	 */
 	private function set_locale() {
 
-		$plugin_i18n = new Jones_Multi_i18n();
+		$plugin_i18n = new Jones_Multisite_i18n();
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
 
@@ -153,7 +152,7 @@ class Jones_Multi {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Jones_Multi_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Jones_Multisite_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -169,7 +168,7 @@ class Jones_Multi {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new Jones_Multi_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Jones_Multisite_Public( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
@@ -200,7 +199,7 @@ class Jones_Multi {
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
 	 * @since     1.0.0
-	 * @return    Jones_Multi_Loader    Orchestrates the hooks of the plugin.
+	 * @return    Jones_Multisite_Loader    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
 		return $this->loader;
@@ -216,41 +215,4 @@ class Jones_Multi {
 		return $this->version;
 	}
 
-	/**
-	 * Load New Taxonomies.
-	 *
-	 * Loads the taxonomies unique to the project.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function create_additional_taxonomies() {
-
-		/**
-		 * The class responsible for defining the signtype taxonomy.
-		 * of the plugin.
-		 *
-		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-taxonomy-services.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-taxonomy-location.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-taxonomy-expertise.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-taxonomy-signtype.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-project.php';
-
-	}
-
-	/**
-	 * Load Additional Post Types.
-	 *
-	 * Loads the additional post types unique to the multisite.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function create_additional_posttypes() {
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-staff.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-project.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-client.php';
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-posttype-testimonial.php';
-	}
 }

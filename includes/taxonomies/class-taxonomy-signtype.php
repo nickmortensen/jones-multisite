@@ -1,24 +1,25 @@
 <?php
+
 /**
- * The 'service' taxonomy.
+ * The 'signtype' taxonomy.
  *
  * @link       https://github.com/nickmortensen
  * @since      1.0.0
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/admin
+ * @package    Jones_Multisites
+ * @subpackage Jones_Multisites/admin
  */
 
 /**
- * The 'service' taxonomy.
+ * The 'signtype' taxonomy.
  *
  * Registers taxonomy name, labels, & parameters.
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/admin
+ * @package    Jones_Multisites
+ * @subpackage Jones_Multisites/admin
  * @author     Nick Mortensen <nmortensen@jonessign.com>
  */
-class Services {
+class SignType {
 	/**
 	 * The arguments of this taxonomy.
 	 *
@@ -26,7 +27,7 @@ class Services {
 	 * @access   private
 	 * @var      string    $type The arguments of this taxonomy..
 	 */
-	private $type = 'services';
+	private $type = 'signtype';
 	/**
 	 * The slug of this taxonomy.
 	 *
@@ -34,7 +35,7 @@ class Services {
 	 * @access   private
 	 * @var      string    $slug The slug of this taxonomy..
 	 */
-	private $slug = 'service';
+	private $slug = 'signtype';
 	/**
 	 * The name of this taxonomy.
 	 *
@@ -42,7 +43,7 @@ class Services {
 	 * @access   private
 	 * @var      string    $name The slug of this taxonomy..
 	 */
-	private $name = 'service';
+	private $name = 'SignTypes';
 	/**
 	 * The singular of this taxonomy.
 	 *
@@ -50,7 +51,7 @@ class Services {
 	 * @access   private
 	 * @var      string    $name The slug of this taxonomy..
 	 */
-	private $singular_name = 'Service';
+	private $singular_name = 'SignType';
 
 	/**
 	 * Event constructor.
@@ -58,58 +59,65 @@ class Services {
 	 * When class is instantiated
 	 */
 	public function __construct() {
+		// Reset taxonomy tables before taxonomy terms are initialized.
+		add_action ( 'init', [ $this, 'all_sites_use_same_taxonomies' ] );
+		// Reset again when we switch blogs.
+		add_action ( 'switch_blog', [ $this, 'all_sites_use_same_taxonomies' ] );
+		// Add extra data columns to the administrator table for this taxonomy.
+
 		// Register the taxonomy.
 		add_action( 'init', [ $this, 'register' ] );
-		// Setup the extra fields for this taxonomy.
+		// Setup the extra fields.
 		add_action( 'cmb2_init', [ $this, 'register_taxonomy_metabox' ] );
+
 		// Add extra columns to the administrator end of this taxonomy.
 		add_filter( 'manage_edit-' . $this->type . '_columns', [ $this, 'set_columns' ], 10, 1 );
 		// Place data within the newly added columns for the admin side of this taxonomy.
 		add_filter( 'manage_' . $this->type . '_custom_column', [ $this, 'edit_columns' ], 10, 3 );
 		// Make new columns for this taxonomy sortable.
 		add_action( 'manage_edit-' . $this->type . '_sortable_columns', [ $this, 'sortable_columns' ] );
-//phpcs:enable
+
 	}
 
 	/**
-	 * Create the taxonomy for 'service'.
+	 * Create the taxonomy for 'signtype'.
 	 *
-	 * Create a custom taxonomy for all sites of 'service'.
+	 * Create a custom taxonomy for all sites of 'signtype'.
 	 *
 	 * @since    1.0.0
 	 */
 	public static function register() {
 		$labels = [
-			'add_new_item'               => __( 'Add Service', 'JonesMulti' ),
-			'add_or_remove_items'        => __( 'Add or Remove Service', 'JonesMulti' ),
-			'all_items'                  => __( 'All Service', 'JonesMulti' ),
-			'back_to_items'              => __( 'Back to Services', 'JonesMulti' ),
-			'choose_from_most_used'      => __( 'Often Used Services', 'JonesMulti' ),
-			'edit_item'                  => __( 'Edit Service', 'JonesMulti' ),
-			'items_list'                 => __( 'Service List', 'JonesMulti' ),
-			'items_list_navigation'      => __( 'Service List Nav', 'JonesMulti' ),
-			'menu_name'                  => __( 'Services', 'JonesMulti' ),
-			'name'                       => _x( 'Service', 'Taxonomy General Name', 'JonesMulti' ),
-			'new_item_name'              => __( 'New Service Tag', 'JonesMulti' ),
-			'no_terms'                   => __( 'No Service Tags', 'JonesMulti' ),
-			'not_found'                  => __( 'Service Not Found', 'JonesMulti' ),
-			'popular_items'              => __( 'Popular Services', 'JonesMulti' ),
-			'search_items'               => __( 'Search Services', 'JonesMulti' ),
-			'separate_items_with_commas' => __( 'Separate Services w/commas', 'JonesMulti' ),
-			'singular_name'              => _x( 'Service', 'Taxonomy Singular Name', 'JonesMulti' ),
-			'update_item'                => __( 'Update Service', 'JonesMulti' ),
-			'view_item'                  => __( 'View Service ', 'JonesMulti' ),
+			'add_new_item'               => __( 'Add Sign Type', 'jsCustom' ),
+			'add_or_remove_items'        => __( 'Add or Remove Sign Type', 'jsCustom' ),
+			'all_items'                  => __( 'All Sign Types', 'jsCustom' ),
+			'back_to_items'              => __( 'Back to Sign Types', 'jsCustom' ),
+			'choose_from_most_used'      => __( 'Often Used Sign Tags', 'jsCustom' ),
+			'edit_item'                  => __( 'Edit Sign Type', 'jsCustom' ),
+			'items_list'                 => __( 'Sign Type List', 'jsCustom' ),
+			'items_list_navigation'      => __( 'Sign Types List Nav', 'jsCustom' ),
+			'menu_name'                  => __( 'Sign Types', 'jsCustom' ),
+			'name'                       => _x( 'Sign Type', 'Taxonomy General Name', 'jsCustom' ),
+			'new_item_name'              => __( 'New Sign Type Tag', 'jsCustom' ),
+			'no_terms'                   => __( 'No Sign Type Tags', 'jsCustom' ),
+			'not_found'                  => __( 'Sign Type Not Found', 'jsCustom' ),
+			'popular_items'              => __( 'Popular Sign Types', 'jsCustom' ),
+			'search_items'               => __( 'Search Sign Types', 'jsCustom' ),
+			'separate_items_with_commas' => __( 'Separate Sign Types w/commas', 'jsCustom' ),
+			'singular_name'              => _x( 'Sign Type', 'Taxonomy Singular Name', 'jsCustom' ),
+			'update_item'                => __( 'Update Sign Type', 'jsCustom' ),
+			'view_item'                  => __( 'View Sign Type ', 'jsCustom' ),
 		];
 
 		$args = [
 			'hierarchical'          => false,
-			'description'           => 'Apply an Service Tag to Photos or Project pages.',
+			'description'           => 'Apply a Sign Type Tag to Photos or Project pages.',
 			'labels'                => $labels,
 			'public'                => true, // Sets the defaults for 'publicly_queryable', 'show_ui', & 'show_in_nav_menus' as well.
-			'query_var'             => 'service',
+			'query_var'             => 'signtype',
 			'show_in_menu'          => true,
 			'show_in_rest'          => true,
-			'rewrite'               => array( 'slug' => 'service' ),
+			'rewrite'               => array( 'slug' => 'sign' ),
 			'show_admin_column'     => true,
 			'show_tagcloud'         => true,
 			'capabilities'          => array( 'manage_terms', 'edit_terms', 'delete_terms', 'assign_posts' ),
@@ -121,30 +129,32 @@ class Services {
 			'page',
 			'attachment',
 			'nav_menu_item',
+			'project',
 		];
 
-		register_taxonomy( 'services', $objects_array, $args );
+		register_taxonomy( 'signtype', $objects_array, $args );
 	}
 	/**
-	 * Create the extra fields for 'service'.
+	 * Create the extra fields for 'signtype'.
 	 *
-	 * Use CMB2 to create additional fields for the service taxonomy.
+	 * Use CMB2 to create additional fields for the signtype taxonomy.
 	 *
 	 * @since    1.0.0
 	 */
 	public static function register_taxonomy_metabox() {
-		$prefix = 'service';
-			// Create an instance of the cmbs2box called $service.
+		$prefix = 'signtype_';
+			// Create an instance of the cmbs2box called $signtype.
 		$newfields = new_cmb2_box(
 			array(
-				'id'           => $prefix . 'edit',
-				'title'        => esc_html__( 'Service Additional Info', 'JonesMulti' ),
-				'object_types' => array( 'term' ), // indicate to cmb we are using terms and not posts.
-				'taxonomies'   => array( 'service' ), // Fields can be added to more than one taxonomy term, but we will limit these just to the service taxonomy term.
-				'cmb_styles'   => true, // Disable cmb2 stylesheet.
-				'show_in_rest' => WP_REST_Server::ALLMETHODS, // WP_REST_Server::READABLE|WP_REST_Server::EDITABLE, // Determines which HTTP methods the box is visible in.
+				'id'                           => $prefix . 'edit',
+				'title'                        => esc_html__( 'Signtype Extra Info', 'jsCustom' ),
+				'object_types'                 => array( 'term' ), // indicate to cmb we are using terms and not posts.
+				'taxonomies'                   => array( 'signtype' ), // Fields can be added to more than one taxonomy term, but we will limit these just to the signtype taxonomy term.
+				'cmb_styles'                   => true, // Disable cmb2 stylesheet.
+				'show_in_rest'                 => WP_REST_Server::ALLMETHODS, // WP_REST_Server::READABLE|WP_REST_Server::EDITABLE, // Determines which HTTP methods the box is visible in.
 				// Optional callback to limit box visibility.
 				// See: https://github.com/CMB2/CMB2/wiki/REST-API#permissions.
+				'get_box_permissions_check_cb' => 'projects_limit_rest_view_to_logged_in_users',
 			)
 		);
 
@@ -152,7 +162,7 @@ class Services {
 			'name'       => 'Instance',
 			'desc'       => 'Scenario Wherein this type of sign is best.',
 			'default'    => '',
-			'id'         => 'serviceCases',
+			'id'         => 'signtypeUseCases',
 			'type'       => 'text',
 			'repeatable' => true,
 			'attributes' => array(
@@ -167,8 +177,8 @@ class Services {
 		// Best images should be a file_list field in CMB2. That way there are several images to choose among.
 		$args = [
 			'name'         => 'Best Images',
-			'desc'         => 'Several Images that are representative of this area of service',
-			'id'           => 'serviceMainImages',
+			'desc'         => 'Several Images that are representative of this sign type ',
+			'id'           => 'signtypeMainImages',
 			'type'         => 'file_list',
 			'preview_size' => array( 400, 300 ),
 			'query_args'   => array( 'type' => 'image' ), // Only images attachment.
@@ -229,10 +239,28 @@ class Services {
 		return $columns;
 	}
 
+	/**
+	 * Ensure Taxonomy terms that are used are the same throughout all the child sites.
+	 *
+	 * Use CMB2 to create additional fields for the signtype taxonomy.
+	 *
+	 * @since    1.0.0
+	 */
+	public static function all_sites_use_same_taxonomies() {
+		global $wpdb;
+		// Change terms table to use main sites terms.
+		$wpdb->terms = $wpdb->base_prefix . 'terms';
+		// Change taxonomy table to use main site's taxonomy table.
+		$wpdb->term_taxonomy = $wpdb->base_prefix . 'term_taxonomy';
+		/**
+		 * NOTE: //if you want to use a different sub sites table for sharing, you can replcace $wpdb->vbase_prefix with $wpdb->get_blog_prefix( $blog_id )
+		 */
+	}
+
 
 
 }
 /**
  * Instantiate class, creating taxonomy.
  */
-new Services();
+new SignType();

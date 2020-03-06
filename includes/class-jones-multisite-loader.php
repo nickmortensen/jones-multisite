@@ -3,11 +3,11 @@
 /**
  * Register all actions and filters for the plugin
  *
- * @link       https://github.com/nickmortensen
+ * @link       https://github.com/user/nickmortensen
  * @since      1.0.0
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/includes
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/includes
  */
 
 /**
@@ -17,11 +17,11 @@
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/includes
+ * @package    Jones_Multisite
+ * @subpackage Jones_Multisite/includes
  * @author     Nick Mortensen <nmortensen@jonessign.com>
  */
-class Jones_Multi_Loader {
+class Jones_Multisite_Loader {
 
 	/**
 	 * The array of actions registered with WordPress.
@@ -102,7 +102,7 @@ class Jones_Multi_Loader {
 			'component'     => $component,
 			'callback'      => $callback,
 			'priority'      => $priority,
-			'accepted_args' => $accepted_args,
+			'accepted_args' => $accepted_args
 		);
 
 		return $hooks;

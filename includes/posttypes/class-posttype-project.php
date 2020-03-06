@@ -6,8 +6,8 @@
  *
  * @link       https://github.com/nickmortensen
  * @since      1.0.0
- * @package    Jones_Multi
- * @subpackage Jones_Multi/admin
+ * @package    Jones_Multisites
+ * @subpackage Jones_Multisites/admin
  */
 
 /**
@@ -15,8 +15,8 @@
  *
  * Registers posttype name, labels, & parameters.
  *
- * @package    Jones_Multi
- * @subpackage Jones_Multi/admin
+ * @package    Jones_Multisites
+ * @subpackage Jones_Multisites/admin
  * @author     Nick Mortensen <nmortensen@jonessign.com>
  */
 class Project {
@@ -92,7 +92,9 @@ class Project {
 	 *
 	 * @var array
 	 */
+	//phpcs:disable
 	protected static $state_list = [ 'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas', 'CA' => 'California', 'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware', 'DC' => 'District Of Columbia', 'FL' => 'Florida', 'GA' => 'Georgia', 'HI' => 'Hawaii', 'ID' => 'Idaho', 'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa', 'KS' => 'Kansas', 'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MD' => 'Maryland', 'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi', 'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada', 'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York', 'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio', 'OK' => 'Oklahoma', 'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island', 'SC' => 'South Carolina', 'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah', 'VT' => 'Vermont', 'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia', 'WI' => 'Wisconsin', 'WY' => 'Wyoming' ];
+	//phpcs:enable
 
 	/**
 	 * Event constructor.
@@ -102,10 +104,14 @@ class Project {
 	public function __construct() {
 		// Creates an 'address' field in CMB2 - really a collection of other fields thast is used as a field.
 		add_filter( 'cmb2_render_address', [ $this, 'render_address_field_callback' ], 10, 5 );
+		// Creates a Star Rating field type in CMB2 -- @link: https://github.com/CMB2/CMB2-Snippet-Library/blob/master/custom-field-types/star-rating-field-type/star-rating-field-type.php.
+		add_filter( 'cmb2_render_rating', [ $this, 'cmb2_render_rating_field_callback' ], 10, 5 );
 		// Register the post type.
 		add_action( 'init', [ $this, 'register' ] );
 		// Setup the extra fields for the post type.
 		add_action( 'cmb2_init', [ $this, 'register_posttype_metabox' ] );
+		// Add star ratings to attachment posts.
+		add_action( 'cmb2_admin_init', [ $this, 'cmb2_star_rating_metabox' ] );
 		// Create additional adminstrator table columns for the post type.
 		add_filter( 'manage_' . $this->type . '_posts_columns', [ $this, 'setup_new_admin_columns' ] );
 		// Populate data in the newly added admin columns for the post type.
@@ -185,6 +191,44 @@ class Project {
 	} //end register.
 
 	/**
+	 * Create the extra fields for the attachment posts - specifically star rating.
+	 *
+	 * Use CMB2 to create additional fields for the client post type.
+	 *
+	 * @since    1.0.0
+	 */
+	public function cmb2_star_rating_metabox() {
+		$metabox_args = [
+			'context'      => 'side',
+			'classes'      => [ 'imageStarsMetabox' ],
+			'id'           => 'image_stars_metabox',
+			'object_types' => [ 'attachment' ],
+			'show_in_rest' => WP_REST_Server::ALLMETHODS,
+			'show_names'   => false,
+			'title'        => 'Star Rating',
+			'cmb_styles'   => true, // Disable cmb2 stylesheet by setting to false.
+		];
+
+		$metabox = new_cmb2_box( $metabox_args );
+		/**
+		 * Star Rating Field CUSTOM.
+		 *
+		 * @see render_star_rating_field_callback().
+		 */
+
+		$args = [
+			'name'         => 'Star Rating',
+			'type'         => 'rating',
+			'id'           => 'mediaStars',
+			'desc'         => 'star rating for photo',
+			'object_types' => [ 'attachment' ],
+			'after_row'    => '<hr>',
+		];
+		$metabox->add_field( $args );
+	}//end cmb2_star_rating_metabox()
+
+
+	/**
 	 * Create the extra fields for the post type.
 	 *
 	 * Use CMB2 to create additional fields for the client post type.
@@ -201,15 +245,18 @@ class Project {
 			'object_types' => [ $this->singular_name ],
 			'show_in_rest' => WP_REST_Server::ALLMETHODS,
 			'show_names'   => true,
-			'title'        => $this->singular_name . ' Overview',
+			'title'        => ucfirst( $this->singular_name ) . ' Overview',
 			'cmb_styles'   => true, // Disable cmb2 stylesheet by setting to false.
 		];
 
 		$metabox = new_cmb2_box( $metabox_args );
-
+		/**
+		 * Get the label for the project address field;
+		 */
 		function get_label_cb() {
-			return '<div style="background: #ffc600; font-size: 2.5rem;">ADDRESS</div>';
+			return '<span class="indigo" style="font-size: 2.5rem;">Project Location Data </span><hr>';
 		}
+
 		/**
 		 * Project Location Field. CUSTOM.
 		 *
@@ -217,31 +264,18 @@ class Project {
 		 */
 //phpcs:disable
 		$args = [
-			'name'         => 'Project Location',
-			'desc'         => 'Address of the Project',
-			'id'           => 'projectLocation', // Name of the custom field type we setup.
-			'type'         => 'address',
-			'object_types' => [ 'project' ], // Only show on project post types.
-			'options'      => [],
-			'label_cb'     => 'get_label_cb',
-			'repeatable' => false,
-			'text' => ['add_row_text' => 'Add another location' ],
-			'show_names' => false, // false removes the left cell of the table -- this is worth understanding.
-			'classes' => [ 'repeatable', 'projectLocationAddress' ],
-			'before'       => '**before arg where the field is added to the meta(line 219)',
-			'after'        => 'after ** arg where the field is added to the meta(line 219)',
-			'before_row'   => '<i class="red material-icons"> account_circle </i>',
-			'after_row'   => '<i class="red material-icons"> android </i>',
-			'after_field'   => '<i class="yellow material-icons"> account_box </i>',
-			'before_field'   => '<i class="yellow material-icons"> autorenew </i>',
-			'before_group' => '<i class="yellow material-icons"> check_circle </i>',
-			'after_group' => '<i class="yellow material-icons"> announcement </i>',
-			'before_group_row' => '<i class="yellow material-icons"> contact_support </i>',
-			'after_group_row' => '<i class="yellow material-icons"> motorcycle </i>',
-			'before_display_wrap' => '<p><i class="yellow material-icons"> update </i> <b>before_display_wrap</b> parameter</p>',
-			'before_display'      => '<p>Testing <b>before_display</b> <i class="yellow material-icons"> contact_support </i></p>',
-			'after_display'       => '<p>Testing <b>after_display</b> <i class="yellow material-icons"> thumbs_up </i></p>',
-			'after_display_wrap'  => '<p>Testing <b>after_display_wrap</b> <i class="yellow material-icons"> view_quilt </i></p>'
+			'name'                => 'Project Location',
+			'desc'                => 'Address of the Project',
+			'id'                  => 'projectLocation', // Name of the custom field type we setup.
+			'type'                => 'address',
+			'object_types'        => [ 'project' ], // Only show on project post types.
+			'options'             => [],
+			'label_cb'            => 'get_label_cb',
+			'repeatable'          => false,
+			'text'                => ['add_row_text' => 'Add another location' ],
+			'show_names'          => false, // false removes the left cell of the table -- this is worth understanding.
+			'classes'             => [ 'repeatable', 'projectLocationAddress' ],
+			'after_row'           => '<hr>',
 
 		];
 		$metabox->add_field( $args );
@@ -270,10 +304,6 @@ class Project {
 			'object_types' => [ 'project' ], // Only show on project post types.
 			'before_row'   => '', // callback.
 			'after_row'    => '<hr>',
-			// 'column'       => [
-			// 	'position' => 0,
-			// 	'name'     => 'Job #',
-			// ],
 		];
 		$metabox->add_field( $args );
 
@@ -323,7 +353,6 @@ class Project {
 			'classes'      => 'statusDate hidden',
 			'name'         => 'Expected',
 			'desc'         => '4 digit year for when this upcoming project is expected to complete',
-			'default'      => '2019',
 			'id'           => 'projectExpectedCompletionYear', // was 'jobYear' - alter that in your database.
 			'type'         => 'text_small',
 			'object_types' => [ 'project' ], // Only show on project post types.
@@ -344,12 +373,10 @@ class Project {
 			'classes'      => 'statusDate hidden',
 			'name'         => 'Started',
 			'desc'         => '4 digit year of when we started working on this ongoing project',
-			'default'      => '2019',
 			'id'           => 'projectYearStarted',
 			'type'         => 'text_small',
 			'object_types' => [ 'project' ], // Only show on project post types.
 			'attributes'   => [
-				'classes' => 'inputTestClass',
 				'data-conditionalid'    => 'projectJobStatus', // the ID value of the field that needs to be selected in order for this one to show up.
 				'data-conditionalvalue' => 'ongoing',
 			],
@@ -399,7 +426,7 @@ class Project {
 			'options'      => [ 'url' => false ],
 			'text'         => [ 'add_upload_file_text' => 'Add SVG' ],
 			'query_args'   => [ 'type' => 'image/svg+xml' ],
-			'preview_size' => 'medium'
+			'preview_size' => 'medium',
 		];
 		$metabox->add_field( $args );
 
@@ -477,16 +504,9 @@ class Project {
 		$new['cb']        = '<input type = "checkbox" />';
 		$new['id']        = 'ID';
 		$new['job_id']    = 'Job';
-		// $new['name']      = 'Project';
 		$new['status']    = 'Status';
 		$new['thumbnail'] = 'Image';
 		$new['year']      = 'Year';
-		// $new['signtypes'] = 'Signtypes';
-		// $new['expertise'] = 'Expertise';
-		// $new['services']  = 'Services';
-
-		// return $new;
-		// return $columns;
 		return array_merge( $new, $columns );
 	}
 	/**
@@ -567,6 +587,12 @@ class Project {
 
 	/**
 	 * Render Address Field
+	 *
+	 * @param array  $field              The passed in `CMB2_Field` .
+	 * @param mixed  $value              The value of this field escaped. It defaults to `sanitize_text_field`.
+	 * @param int    $object_id          The ID of the current object.
+	 * @param string $object_type        The type of object you are working with. Most commonly, `post` (this applies to all post-types),but could also be `comment`, `user` or `options-page`.
+	 * @param object $field_type         The `CMB2_Types` object.
 	 */
 	public function render_address_field_callback( $field, $value, $object_id, $object_type, $field_type ) {
 		$new_values = [
@@ -577,41 +603,10 @@ class Project {
 			'latitude'  => '',
 			'longitude' => '',
 		];
-		$value     = wp_parse_args( $value, $new_values );
-
-		/**
-		 *  FOR REFERENCE PURPOSES - DELETE IN PRODUCTION.
-		 * @link https://www.php.net/manual/en/function.func-get-args.php
-		 */
-		// echo '<pre>';
-		// print_r( func_get_args()[0] );
-		// echo '</pre>';
-
-
+		$value      = wp_parse_args( $value, $new_values );
 	?>
 
-		<style>
-			div.field-div {
-				display: flex;
-				justify-content: flex-start;
-			}
-
-			.field-div > span {
-				flex-basis: 2;
-			}
-
-			.field-div > input {
-				flex-basis: 4;
-			}
-
-			.citystatezip {
-				display: flex;
-				flex-flow: row nowrap;
-				justify-content: flex-end;
-				background: var(--red-300);
-			}
-		</style>
-
+	<section class="projectAddressFields">
 		<!-- address-1 -->
 		<div class="field-div" data-fieldid="address1">
 			<span class="innerlabel">
@@ -680,6 +675,7 @@ class Project {
 				?>
 			</div><!-- /zip -->
 		</div><!-- /city state zip -->
+
 		<!-- coordinates -->
 		<div class="coordinates">
 			<div data-fieldid="latitude" class="field-div">
@@ -712,9 +708,43 @@ class Project {
 			</div><!-- /longitude -->
 		</div><!-- /coordinates -->
 
+	</section><!-- end section.projectaddressfields -->
 	<?php
-	} //end render_address_field_callback
+	}//end render_address_field_callback()
 
+	/**
+	 * Render 'star rating' custom field type
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array  $field              The passed in `CMB2_Field` .
+	 * @param mixed  $value              The value of this field escaped. It defaults to `sanitize_text_field`.
+	 * @param int    $object_id          The ID of the current object.
+	 * @param string $object_type        The type of object you are working with. Most commonly, `post` (this applies to all post-types),but could also be `comment`, `user` or `options-page`.
+	 * @param object $field_type         The `CMB2_Types` object.
+	 */
+	public function cmb2_render_rating_field_callback( $field, $value, $object_id, $object_type, $field_type ) {
+		?>
+		<section id="cmb2-star-rating-metabox">
+			<fieldset>
+				<span class="star-cb-group">
+					<?php
+						$y = 5;
+						while ( $y > 0 ) {
+							?>
+								<input type="radio" id="rating-<?php echo $y; ?>" name="<?php echo $field_type->_id( false ); ?>" value="<?php echo $y; ?>" <?php checked( $value, $y ); ?>/>
+								<label for="rating-<?php echo $y; ?>"><?php echo $y; ?></label>
+							<?php
+							$y--;
+						}
+					?>
+				</span>
+			</fieldset>
+		</section>
+	<?php
+	echo $field_type->_desc( true );
+
+	}
 
 } //end Project class.
 
